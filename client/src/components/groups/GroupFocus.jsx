@@ -33,8 +33,8 @@ const GroupFocus = () => {
       const { data } = await axios.get(`${server}/api/group/${id}`);
       const [ group ] = data.status;
       if (group) {
-        console.log(group);
         setGroupInfo(group);
+        setStans(group.stans);
       }
     }
     dataFetch();
@@ -61,10 +61,12 @@ const GroupFocus = () => {
     axios.put(`${server}/api/update/subs`, {
       type, id, change
     }).then((result) => {
-      console.log(result.data);
+      const { status } = result.data;
+      const { stans } = status[0];
+      setStans(stans);
     })
-
   }
+
   return (
     <Paper elevation={3} >
       <Typography variant="h3" align="center">
@@ -83,7 +85,6 @@ const GroupFocus = () => {
         <Button
           onClick={(event) => {
             event.preventDefault();
-            console.log('I got clicked!')
             updateDB('stans', groupInfo.id, 'add');
           }}
         >

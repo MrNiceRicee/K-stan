@@ -36,7 +36,7 @@ const GroupStart = () =>  {
           <Group id={group.id} groupName={group.group_name} stans={group.stans} groupPicture={group.picture} key={`group${group.id}`} />
         ))}
       </React.Suspense>
-      <Button style={{width: '100%'}} onClick={viewMore}>
+      <Button style={{width: '100%', ...themeDesign.custom.paddingy(3), ...themeDesign.custom.marginy(2)}} onClick={viewMore}>
         <Typography>
           view more
         </Typography>

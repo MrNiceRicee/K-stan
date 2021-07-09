@@ -6,7 +6,7 @@ import {
   Table, TableBody, TableRow, TableCell,
   Avatar
 } from '@material-ui/core';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
 import { useTheme } from '@material-ui/core/styles';
 import Image from 'material-ui-image';
 import axios from 'axios';
@@ -18,8 +18,11 @@ import ServerContext from '../context/ServerConn';
 
 const IdolFocus = () => {
   let { id } = useParams();
+  const history = useHistory();
   const [ idolInfo, setIdolInfo ] = useState({group_members: []});
   const [ rowInfo, setRowInfo ] = useState([]);
+  const [ bias, setBias ] = useState(0);
+  const [ bias_wrecker, setBias_Wrecker] = useState(0);
   const themeDesign = useTheme();
   const server = useContext(ServerContext);
   const greyScale = 600;
@@ -30,9 +33,10 @@ const IdolFocus = () => {
       const { data } = await axios.get(`${server}/api/idol/${id}`);
       const [ idol ] = data.status;
       if (idol) {
-        console.log(idol);
         idol.group_members = idol.group_members || [];
         setIdolInfo(idol);
+        setBias(idol.bias);
+        setBias_Wrecker(idol.bias_wrecker);
       }
     }
     dataFetch();
@@ -56,7 +60,19 @@ const IdolFocus = () => {
     }
   }, [idolInfo]);
 
-
+  const updateDB = (type, id, change) => {
+    axios.put(`${server}/api/update/subs`, {
+      type, id, change
+    }).then((result) => {
+      const { status } = result.data;
+      const data = status[0];
+      if (type === 'bias') {
+        setBias(data.bias);
+      } else if (type === 'bias_wrecker') {
+        setBias_Wrecker(data.bias_wrecker);
+      }
+    })
+  }
 
   return (
     <Paper elevation={3} >
@@ -73,16 +89,28 @@ const IdolFocus = () => {
         {/* <Typography style={{...themeDesign.custom.grey(greyScale), ...themeDesign.custom.padding(1)}}>
           #RANK
         </Typography> */}
-        <Button>
+        <Button
+          onClick={(event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            updateDB('bias', idolInfo.id, 'add');
+          }}
+        >
           <FavoriteBorder color="disabled"/>
           <Typography align="center" style={themeDesign.custom.grey(greyScale)}>
-            {idolInfo.bias}
+            {bias}
           </Typography>
         </Button>
-        <Button>
+        <Button
+          onClick={(event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            updateDB('bias_wrecker', idolInfo.id, 'add');
+          }}
+        >
           <BiasWrecker />
           <Typography align="center" style={themeDesign.custom.grey(greyScale)}>
-            {idolInfo.bias_wrecker}
+            {bias_wrecker}
           </Typography>
         </Button>
       </Box>
@@ -105,9 +133,17 @@ const IdolFocus = () => {
             ))}
           </TableBody>
         </Table>
-        <Typography variant="h4" align="center">
-          {idolInfo.group} <Typography>members</Typography>
-        </Typography>
+        <Button
+          onClick={(event) => {
+            event.preventDefault();
+            history.push(`/groups/${idolInfo.group_id}`);
+          }}
+          style={{ width: '100%' }}
+        >
+          <Typography variant="h4" align="center">
+            {idolInfo.group} <Typography>members</Typography>
+          </Typography>
+        </Button>
         <Box display="flex" flexWrap="wrap" justifyContent="space-around">
           {idolInfo.group_members.map((member) => (
             <Box

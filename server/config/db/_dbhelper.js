@@ -3,7 +3,7 @@ const { query } = require('./connect');
 const findTopIdols = () => query(`
 SELECT icon.id, icon.stage_name, icon.group, icon.bias, icon.bias_wrecker, icon.picture
 FROM kpop_idols AS icon
-ORDER BY (bias + (bias_wrecker * .75)) ASC, stage_name ASC
+ORDER BY (bias + (bias_wrecker * .75)) DESC, stage_name ASC
 `);
 
 const findIdolById = (id) => query(`
@@ -30,13 +30,11 @@ const findTopGroups = () => query(`
       FROM kpop_idols
       WHERE kpop_idols.group_id=kpop_groups.id) idol) AS members
   FROM kpop_groups
-  ORDER BY stans ASC,
-        group_name ASC,
-        picture ASC;
+  ORDER BY stans DESC,
+        group_name ASC
 `);
 
 const findGroupById = (id) => {
-  console.log('searching for', id);
   return query(`
   SELECT kpop_groups.*,
   (SELECT json_agg(idol)
@@ -79,15 +77,20 @@ const updateReducer = (type, id, change) => {
   let table = '';
   let query = 'UPDATE ';
   let conditional = ` WHERE id=${id} `
-  if (type === 'stan') {
-    table = 'kpop_idols';
+  if (type === 'stans') {
+    query += ' kpop_groups ';
+  } else if (type === 'bias' || type ==='bias_wrecker') {
+    query += 'kpop_idols';
   }
-
+  if (change === 'add') {
+    query += ` SET ${type}=${type}+1 `;
+  }
+  query += conditional + ` RETURNING ${type}; `
+  return query;
 }
 
 const updateDB = (type, id, change) => {
-  console.log(type, id, change);
-  return query(``);
+  return query(updateReducer(type,id,change));
 };
 
 

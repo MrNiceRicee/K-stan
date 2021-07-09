@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
 import {
   Box, Card, CardActions,
   CardMedia, CardContent, CardActionArea,
@@ -9,11 +9,17 @@ import {
  Link, useHistory
 } from 'react-router-dom';
 import { FavoriteBorder } from '@material-ui/icons';
+import axios from 'axios';
+
 import BiasWrecker from '../icons/BiasWrecker';
+import ServerContext from '../context/ServerConn';
 
 const Idol = ({ stageName, bias, biasWrecker, group, id, picture, rank }) => {
   const themeDesign = useTheme();
   const history = useHistory();
+  const server = useContext(ServerContext)
+  const [ _bias, setBias ] = useState(bias);
+  const [ bias_wrecker, setBias_Wrecker] = useState(biasWrecker);
   const generateInitials = () => {
     let [firstSpaced, secondSpaced] = stageName.split(' ');
     firstSpaced = firstSpaced ? firstSpaced[0] : '';
@@ -30,6 +36,20 @@ const Idol = ({ stageName, bias, biasWrecker, group, id, picture, rank }) => {
     let [first, second] = stageName;
     second = second ? second.toUpperCase() : '';
     return `${first}${second}`;
+  }
+
+  const updateDB = (type, id, change) => {
+    axios.put(`${server}/api/update/subs`, {
+      type, id, change
+    }).then((result) => {
+      const { status } = result.data;
+      const data = status[0];
+      if (type === 'bias') {
+        setBias(data.bias);
+      } else if (type === 'bias_wrecker') {
+        setBias_Wrecker(data.bias_wrecker);
+      }
+    })
   }
 
   return (
@@ -60,26 +80,28 @@ const Idol = ({ stageName, bias, biasWrecker, group, id, picture, rank }) => {
                   </Typography> */}
                   <Button
                     onMouseDown={(event) => event.stopPropagation()}
-                    onClick={(event) =>{
+                    onClick={(event) => {
                       event.stopPropagation();
-                      console.log('Button is clicked!')
+                      event.preventDefault();
+                      updateDB('bias', id, 'add');
                     }}
                   >
                     <FavoriteBorder color="disabled"/>
                     <Typography style={themeDesign.custom.muted}>
-                      {bias}
+                      {_bias}
                     </Typography>
                   </Button>
                   <Button
                     onMouseDown={(event) => event.stopPropagation()}
-                    onClick={(event) =>{
+                    onClick={(event) => {
                       event.stopPropagation();
-                      console.log('Button is clicked!')
+                      event.preventDefault();
+                      updateDB('bias_wrecker', id, 'add');
                     }}
                   >
                     <BiasWrecker />
                     <Typography style={themeDesign.custom.muted}>
-                      {biasWrecker}
+                      {bias_wrecker}
                     </Typography>
                   </Button>
                 </Box>

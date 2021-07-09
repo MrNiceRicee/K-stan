@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useContext } from 'react';
 import {
   Box, Card, CardActions,
   CardMedia, CardContent, CardActionArea,
@@ -11,11 +11,25 @@ import {
   Link, useHistory
 } from 'react-router-dom';
 import noImage from '../../assets/NoImage.jpg';
+import ServerContext from '../context/ServerConn';
+import axios from 'axios';
 
 const Group = ({ groupName, stans, id, groupPicture }) => {
   const themeDesign = useTheme();
   const history = useHistory();
+  const [ _stans, setStans ] = useState(stans);
+  const server = useContext(ServerContext);
   const greyScale = 500;
+
+  const updateDB = (type, id, change) => {
+    axios.put(`${server}/api/update/subs`, {
+      type, id, change
+    }).then((result) => {
+      const { status } = result.data;
+      const { stans } = status[0];
+      setStans(stans);
+    })
+  }
 
   return (
     <Box component={Card} style={{ marginTop: '16px', ...themeDesign.custom.marginx(1) }} boxShadow={3}>
@@ -51,14 +65,15 @@ const Group = ({ groupName, stans, id, groupPicture }) => {
               </Typography> */}
               <Button
                 onMouseDown={(event) => event.stopPropagation()}
-                onClick={(event) =>{
+                onClick={(event) => {
                   event.stopPropagation();
-                  console.log('Button is clicked!')
+                  event.preventDefault();
+                  updateDB('stans', id, 'add');
                 }}
               >
                 <Person style={themeDesign.custom.grey(greyScale)}/>
                 <Typography variant="body2" style={themeDesign.custom.grey(greyScale)}>
-                  {stans}
+                  {_stans}
                 </Typography>
               </Button>
             </Box>
