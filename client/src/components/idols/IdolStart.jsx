@@ -14,6 +14,7 @@ const IdolStart = () => {
 
   useEffect(() => {
     const dataFetch = async () => {
+      console.log(`${server}/api/topIdols`);
       const results = await axios.get(`${server}/api/topIdols`);
       const { status } = results.data;
       setIdols(status);

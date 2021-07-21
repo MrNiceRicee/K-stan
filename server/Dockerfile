@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM node:16-alpine
 
 RUN mkdir -p /src/app
 
@@ -8,6 +8,6 @@ COPY . /src/app/
 
 RUN yarn install
 
-EXPOSE 3000
+EXPOSE 8000
 
 CMD ["npm", "start"]

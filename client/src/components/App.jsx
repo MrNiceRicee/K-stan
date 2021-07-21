@@ -99,7 +99,7 @@ function App() {
   return (
       <MemoryRouter initialEntries={[{pathname: '/idols'}]}>
         <ThemeProvider theme={themeDesign}>
-          <ServerContext.Provider value={'http://127.0.0.1:8000'}>
+          <ServerContext.Provider value={'http://192.168.86.33:8000'}>
             <CssBaseline />
             <TopBar setDarkMode={setDarkMode} darkMode={darkMode} />
             <Container style={{...themeDesign.custom.padding(0), marginBottom: '4em'}} maxWidth="sm">
